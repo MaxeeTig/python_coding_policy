@@ -1,0 +1,21 @@
+/add D:\Users\tigulev\Documents\AI_Laboratory\Development\python_coding_policy\file_processing.py 
+/add D:\Users\tigulev\Documents\AI_Laboratory\Development\python_coding_policy\config.cfg 
+/add D:\Users\tigulev\Documents\AI_Laboratory\Development\python_coding_policy\python_coding_20250418.py 
+
+Please create python script 'file_processing.py to process files recursively in directories and sub-folders 
+# Functionality 
+1. walk through directory from ./data folder 
+2. get current file name
+3. read current file size 
+4. calculate md5 for file 
+5. store information in sqlite database  
+6. store file status like 'processed'
+
+# Artifacts
+## Create required sections in 'config.cfg' for root path, database file path, logs path, debug mode flag, etc.  
+## Create sqlite database structure using CREATE TABLE clause for file name, file path storage, file size, md5, status
+
+# Policy
+Use python coding policy as specified in file 'python_coding_20250418.py'
+Important: do not import functions from the file 'python_coding_20250418.py', copy appropriate code to main sript
+
