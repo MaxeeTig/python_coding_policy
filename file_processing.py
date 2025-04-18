@@ -1,4 +1,3 @@
-﻿
 """
 File Processing System
 Recursively processes files in directories, calculates checksums and stores metadata in database.
