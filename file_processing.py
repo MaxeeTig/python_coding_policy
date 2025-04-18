@@ -175,15 +175,25 @@ def main() -> None:
         
         # Process files
         root_path = config['DEFAULT']['root_path']
+        processed_count = 0
+        skipped_count = 0
+        
         for file_path in walk_directory(root_path):
             try:
                 logger.debug(f"Processing file: {file_path}")
                 process_file(file_path, config)
+                processed_count += 1
             except Exception as e:
                 logger.warning(f"Skipped file {file_path} due to error: {str(e)}")
+                skipped_count += 1
                 continue
                 
-        logger.info("File processing completed successfully")
+        logger.info(
+            f"File processing completed. "
+            f"Processed: {processed_count} files, "
+            f"Skipped: {skipped_count} files, "
+            f"Total: {processed_count + skipped_count} files"
+        )
         
     except Exception as e:
         log_error("Fatal error in main processing", e)
