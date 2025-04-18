@@ -10,13 +10,84 @@ from typing import Iterator, Tuple, Optional
 from configparser import ConfigParser
 import sqlite3
 
-# Import policy-compliant functions from coding policy
-from python_coding_20250418 import (
-    load_configuration,
-    configure_logging,
-    DatabaseManager,
-    log_error
-)
+import os
+import sys
+import logging
+from typing import Any, Dict, Optional
+import sqlite3
+import configparser
+
+def load_configuration(config_path: Optional[str] = None) -> configparser.ConfigParser:
+    """Load configuration with safe defaults following policy requirements"""
+    config = configparser.ConfigParser()
+    
+    # Determine config path
+    final_path = config_path if config_path else (
+        sys.argv[1] if len(sys.argv) > 1 else 'config.cfg'
+    )
+    
+    if not os.path.exists(final_path):
+        raise FileNotFoundError(f"Config file not found: {final_path}")
+    
+    config.read(final_path)
+    
+    # Validate minimum required sections
+    required_sections = {'DEFAULT', 'LOGGING', 'DATABASE'}
+    missing = required_sections - set(config.sections())
+    if missing:
+        raise ValueError(f"Missing required config sections: {missing}")
+    
+    return config
+
+def configure_logging(config: configparser.ConfigParser) -> None:
+    """Initialize standardized logging following policy requirements"""
+    log_dir = os.path.dirname(config['LOGGING']['file_path'])
+    os.makedirs(log_dir, exist_ok=True)
+    
+    log_format = '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
+    date_format = '%Y-%m-%d %H:%M:%S'
+    
+    # File handler
+    logging.basicConfig(
+        level=config['LOGGING'].get('level', 'INFO'),
+        format=log_format,
+        datefmt=date_format,
+        filename=config['LOGGING']['file_path'],
+        filemode='a'
+    )
+    
+    # Add console handler if debug mode
+    if config['LOGGING'].getboolean('debug', False):
+        console = logging.StreamHandler()
+        console.setLevel(logging.DEBUG)
+        console.setFormatter(logging.Formatter(log_format, datefmt=date_format))
+        logging.getLogger().addHandler(console)
+
+class DatabaseManager:
+    """Safe database operations wrapper following policy requirements"""
+    def __init__(self, config: configparser.ConfigParser):
+        self.db_path = config['DATABASE']['path']
+        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+    
+    def __enter__(self):
+        self.conn = sqlite3.connect(self.db_path)
+        self.conn.row_factory = sqlite3.Row
+        return self.conn.cursor()
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type is None:
+            self.conn.commit()
+        else:
+            self.conn.rollback()
+        self.conn.close()
+
+def log_error(context: str, error: Exception) -> None:
+    """Standardized error reporting following policy requirements"""
+    logger = logging.getLogger(__name__)
+    logger.error(
+        f"{context} - {type(error).__name__}: {str(error)}",
+        exc_info=True
+    )
 
 def calculate_md5(file_path: str, block_size: int = 65536) -> str:
     """Calculate MD5 hash of a file in chunks to handle large files."""
