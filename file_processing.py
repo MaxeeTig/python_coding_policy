@@ -31,7 +31,8 @@ def load_configuration(config_path: Optional[str] = None) -> configparser.Config
     config.read(final_path)
     
     # Validate minimum required sections
-    required_sections = {'DEFAULT', 'LOGGING', 'DATABASE'}
+    sections = config.sections() 
+    required_sections = {'LOGGING', 'DATABASE'}
     missing = required_sections - set(config.sections())
     if missing:
         raise ValueError(f"Missing required config sections: {missing}")
